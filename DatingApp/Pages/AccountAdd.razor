@@ -1,0 +1,89 @@
+﻿
+@page "/AddAccount"
+@using DatingApp.Models
+@using System.Data.SqlClient
+<h3>Add Account</h3>
+
+<div class="form-group">
+    <label for="accountName">Account Name</label>
+    <input id="accountName" class="form-control" @bind="newAccount.accountname" />
+</div>
+
+<div class="form-group">
+    <label for="username">Username</label>
+    <input id="username" class="form-control" @bind="newAccount.username" />
+</div>
+
+<div class="form-group">
+    <label for="password">Password</label>
+    <input id="password" class="form-control" @bind="newAccount.password" />
+</div>
+
+<div class="form-group">
+    <label for="date">Birthday</label>
+    <input id="date" class="form-control" @bind="newAccount.date"/>
+</div>
+
+<div class="form-group">
+    <label for="tlf">Phone Number</label>
+    <input id="tlf" class="form-control" @bind="newAccount.tlf" />
+</div>
+
+<button class="btn btn-primary" @onclick="AddAccount">Add Account</button>
+
+@code {
+
+
+    private Account newAccount = new Account();
+
+    private void AddAccount()
+    {
+
+
+        string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;"; // Replace with your actual connection string
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = connection;
+                cmd.CommandText = "INSERT INTO Account (Names, UserName, Passwords, BirthDay, Tlf) VALUES (@AccountName, @Username, @Password, @Birthday, @PhoneNumber); SELECT SCOPE_IDENTITY();";
+
+                cmd.Parameters.AddWithValue("@AccountName", newAccount.accountname);
+                cmd.Parameters.AddWithValue("@Username", newAccount.username);
+                cmd.Parameters.AddWithValue("@Password", newAccount.password);
+                cmd.Parameters.AddWithValue("@Birthday", newAccount.date);
+                cmd.Parameters.AddWithValue("@PhoneNumber", newAccount.tlf);
+
+
+
+                int newId = Convert.ToInt32(cmd.ExecuteScalar());
+                Console.WriteLine(newId);
+                cmd.CommandText = "Insert Into Profiles(AccountId) Values(@AccountId);";
+                cmd.Parameters.AddWithValue("@AccountId", newId);
+                cmd.ExecuteNonQuery();
+                //int a = cmd.ExecuteNonQuery();
+                //Console.WriteLine(a);
+                //if (a >= 1)
+                //{
+                //    Console.WriteLine("Data added Sucessfully");
+                //}
+                //else
+                //{
+                //    Console.WriteLine("Something went wrong. try again");
+                //}
+
+                
+
+
+            }
+        }
+        
+        var message = $"Account '{newAccount.accountname}' added to the database.";
+        Console.WriteLine(message);
+        
+        newAccount = new Account();
+    }
+}
