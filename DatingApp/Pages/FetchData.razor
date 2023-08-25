@@ -1,47 +1,51 @@
 ﻿@page "/fetchdata"
 @using DatingApp.Data
-@inject WeatherForecastService ForecastService
+@using System.Data.SqlClient
 
-<PageTitle>Weather forecast</PageTitle>
+<PageTitle>test</PageTitle>
 
-<h1>Weather forecast</h1>
+<h1>input username</h1>
 
-<p>This component demonstrates fetching data from a service.</p>
+<div class="form-group">
+    <label for="test">Username</label>
+    <input id="test" class="form-control" @bind="test" />
+</div>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<div class="form-group">
+    <label for="AccId">@AccId</label>  
+</div>
+
+<button class="btn btn-primary" @onclick="test1">test</button>
 
 @code {
-    private WeatherForecast[]? forecasts;
+    string test;
+    int AccId;
 
-    protected override async Task OnInitializedAsync()
+    private void test1()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
+        string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;";
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.Connection = connection;
+                cmd.CommandText = "SELECT Id FROM Account WHERE UserName = @UserName";
+
+                
+                cmd.Parameters.AddWithValue("@UserName", test);
+
+                object accountId = cmd.ExecuteScalar(); 
+
+                if (accountId != null)
+                {
+                    int accId = Convert.ToInt32(accountId);
+                    AccId = accId;
+                }
+            }
+
+            connection.Close();
+        }
     }
 }

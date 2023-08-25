@@ -1,4 +1,6 @@
-﻿namespace DatingApp.Models
+﻿using Microsoft.VisualBasic;
+
+namespace DatingApp.Models
 {
     public class Account
     {
