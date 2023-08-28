@@ -39,8 +39,8 @@ else
             isLoggedIn = true;
 
             // Store the login status and username in session storage.
-            await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "isLoggedIn", true);
-            await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "username", username);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "isLoggedIn", true);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "username", username);
         }
         else
         {
@@ -58,8 +58,8 @@ else
         username = "";
 
         // Remove the login status and username from session storage.
-        await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", "isLoggedIn");
-        await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", "username");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "isLoggedIn");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "username");
     }
 
     private async Task<bool> AuthenticateUser(string username, string password)

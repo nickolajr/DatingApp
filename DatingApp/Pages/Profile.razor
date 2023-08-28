@@ -1,0 +1,86 @@
+﻿@page "/Profile"
+@using DatingApp.Models
+@using System.Data.SqlClient
+@inject IJSRuntime JSRuntime
+<h3>Profile</h3>
+
+@foreach (var accInfo in Accinfo)
+{
+    <div class="form-group">
+        <label for="accountName">Account Name: @accInfo.accountname </label>
+        <input id="accountName" class="form-control" @bind="test" />
+    </div>
+
+    <div class="form-group">
+        <label for="username">Username: @accInfo.username</label>
+        <input id="username" class="form-control" @bind="test" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password: @accInfo.password</label>
+        <input id="password" class="form-control" @bind="test" />
+    </div>
+
+    <div class="form-group">
+        <label for="tlf">Phone Number: @accInfo.tlf</label>
+        <input id="tlf" class="form-control" @bind="test" />
+    </div>
+}
+
+<button class="btn btn-primary" @onclick="test1">test</button>
+
+@code {
+    private string username;
+    private bool isLoggedIn;
+    string test;
+    List<Account> Accinfo = new List<Account>();
+
+    async Task LoadAccountInfoAsync()
+    {
+        string conStr = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;";
+
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            await con.OpenAsync();
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.CommandText = "SELECT Tlf, UserName, Passwords, Names FROM Account WHERE UserName = @username";
+                cmd.Parameters.AddWithValue("@username", username);
+                cmd.Connection = con;
+
+                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            Account accinfo = new Account();
+
+                            try { accinfo.tlf = reader.GetInt32(0); } catch { accinfo.tlf = 0; }
+                            try { accinfo.username = reader.GetString(1); } catch { accinfo.username = "null"; }
+                            try { accinfo.password = reader.GetString(2); } catch { accinfo.password = "null"; }
+                            try { accinfo.accountname = reader.GetString(3); } catch { accinfo.accountname = "null"; }
+
+                            Accinfo.Add(accinfo);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("There's no rows");
+                    }
+                }
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        username = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "username");
+        await LoadAccountInfoAsync();
+    }
+
+    void test1()
+    {
+
+    }
+}

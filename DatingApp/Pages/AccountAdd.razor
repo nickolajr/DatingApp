@@ -2,6 +2,7 @@
 @page "/AddAccount"
 @using DatingApp.Models
 @using System.Data.SqlClient
+@using System.Data
 <h3>Add Account</h3>
 
 <div class="form-group">
@@ -48,32 +49,25 @@
 
             using (SqlCommand cmd = new SqlCommand())
             {
-                cmd.Connection = connection;
-                cmd.CommandText = "INSERT INTO Account (Names, UserName, Passwords, BirthDay, Tlf) VALUES (@AccountName, @Username, @Password, @Birthday, @PhoneNumber); SELECT SCOPE_IDENTITY();";
+                
+                SqlCommand sql_cmnd = new SqlCommand("AccAdd", connection);
+                sql_cmnd.CommandType = CommandType.StoredProcedure;
+                sql_cmnd.Parameters.AddWithValue("@AccountName", newAccount.accountname);
+                sql_cmnd.Parameters.AddWithValue("@Username", newAccount.username);
+                sql_cmnd.Parameters.AddWithValue("@Password", newAccount.password);
+                sql_cmnd.Parameters.AddWithValue("@Birthday", newAccount.date);
+                sql_cmnd.Parameters.AddWithValue("@PhoneNumber", newAccount.tlf);
 
-                cmd.Parameters.AddWithValue("@AccountName", newAccount.accountname);
-                cmd.Parameters.AddWithValue("@Username", newAccount.username);
-                cmd.Parameters.AddWithValue("@Password", newAccount.password);
-                cmd.Parameters.AddWithValue("@Birthday", newAccount.date);
-                cmd.Parameters.AddWithValue("@PhoneNumber", newAccount.tlf);
-
-
-
-                int newId = Convert.ToInt32(cmd.ExecuteScalar());
-                Console.WriteLine(newId);
-                cmd.CommandText = "Insert Into Profiles(AccountId) Values(@AccountId);";
-                cmd.Parameters.AddWithValue("@AccountId", newId);
-                cmd.ExecuteNonQuery();
-                //int a = cmd.ExecuteNonQuery();
-                //Console.WriteLine(a);
-                //if (a >= 1)
-                //{
-                //    Console.WriteLine("Data added Sucessfully");
-                //}
-                //else
-                //{
-                //    Console.WriteLine("Something went wrong. try again");
-                //}
+                int a = sql_cmnd.ExecuteNonQuery();
+                Console.WriteLine(a);
+                if (a >= 1)
+                {
+                    Console.WriteLine("Data added Sucessfully");
+                }
+                else
+                {
+                    Console.WriteLine("Something went wrong. try again");
+                }
 
                 
 

@@ -20,11 +20,11 @@ else
     protected override async Task OnInitializedAsync()
     {
         // Retrieve the value from session storage as a string
-        string isLoggedInString = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "isLoggedIn");
+        string isLoggedInString = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "isLoggedIn");
 
         // Parse the string to a boolean with a default value of false
         isLoggedIn = !string.IsNullOrEmpty(isLoggedInString) && bool.TryParse(isLoggedInString, out bool isLoggedInResult) && isLoggedInResult;
-        username = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "username");
+        username = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "username");
     }
 
     private async Task Login()
@@ -35,8 +35,8 @@ else
         username = "exampleUser";
 
         // Store the login status in session storage.
-        await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "isLoggedIn", true);
-        await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "username", username);
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "isLoggedIn", true);
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "username", username);
     }
 
     private async Task Logout()
@@ -46,7 +46,7 @@ else
         username = "";
 
         // Remove the items from session storage.
-        await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", "isLoggedIn");
-        await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", "username");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "isLoggedIn");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "username");
     }
 }
