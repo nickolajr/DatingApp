@@ -3,42 +3,49 @@
 @using System.Data.SqlClient
 @using System.Data
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavMan
 <h3>Profile</h3>
 
 @foreach (var accInfo in Accinfo)
 {
     <div class="form-group">
         <label for="accountName">Account Name: @accInfo.accountname </label>
-        <input id="accountName" class="form-control" @bind="test" />
+        <input id="accountName" class="form-control" @bind="NewName" />
     </div>
-    <button class="btn btn-primary" @onclick="test1">test</button>
+    <button class="btn btn-primary" @onclick="EditName">New Name</button>
     <div class="form-group">
         <label for="username">Username: @accInfo.username</label>
-        <input id="username" class="form-control" @bind="test" />
+        <input id="username" class="form-control" @bind="NewUsername" />
     </div>
-    <button class="btn btn-primary" @onclick="test1">test</button>
+    <button class="btn btn-primary" @onclick="EditUsername">New Username</button>
 
     <div class="form-group">
         <label for="password">Password: @accInfo.password</label>
-        <input id="password" class="form-control" @bind="test" />
+        <input id="password" class="form-control" @bind="NewPassword" />
     </div>
-    <button class="btn btn-primary" @onclick="test1">test</button>
+    <button class="btn btn-primary" @onclick="EditPassword">New Password</button>
     <div class="form-group">
         <label for="tlf">Phone Number: @accInfo.tlf</label>
-        <input id="tlf" class="form-control" @bind="test" />
+        <input id="tlf" class="form-control" @bind="NewNumber" />
     </div>
+    <button class="btn btn-primary" @onclick="EditTlf">New Number</button>
 }
 
-<button class="btn btn-primary" @onclick="test1">test</button>
+
 
 @code {
     private string username;
     private bool isLoggedIn;
+    string NewUsername;
+    string NewName;
+    int NewNumber;
+    string NewPassword;
     string test;
     List<Account> Accinfo = new List<Account>();
 
     async Task LoadAccountInfoAsync()
     {
+
         string conStr = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;";
 
         using (SqlConnection con = new SqlConnection(conStr))
@@ -85,5 +92,123 @@
     void test1()
     {
 
+    }
+    private Account newAccount = new Account();
+
+    private void EditUsername()
+    {
+
+
+        string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;"; // Replace with your actual connection string
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+
+                SqlCommand sql_cmnd = new SqlCommand("UpdateUsername", connection);
+                sql_cmnd.CommandType = CommandType.StoredProcedure;                
+                sql_cmnd.Parameters.AddWithValue("@newUsername", NewUsername);
+                sql_cmnd.Parameters.AddWithValue("@currentUsername", username);
+                sql_cmnd.ExecuteNonQuery();
+                NavMan.NavigateTo("/fetchdata");
+                NavMan.NavigateTo("/Profile");
+            }
+        }
+       
+
+        var message = $"Account '{newAccount.accountname}' added to the database.";
+        Console.WriteLine(message);
+
+        newAccount = new Account();
+    }
+    private void EditName()
+    {
+
+
+        string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;"; // Replace with your actual connection string
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+
+                SqlCommand sql_cmnd = new SqlCommand("UpdateName", connection);
+                sql_cmnd.CommandType = CommandType.StoredProcedure;
+                sql_cmnd.Parameters.AddWithValue("@newName", NewName);
+                sql_cmnd.Parameters.AddWithValue("@currentUsername", username);
+                sql_cmnd.ExecuteNonQuery();
+                NavMan.NavigateTo("/fetchdata");
+                NavMan.NavigateTo("/Profile");
+            }
+        }
+
+
+        var message = $"Account '{newAccount.accountname}' added to the database.";
+        Console.WriteLine(message);
+
+        newAccount = new Account();
+    }
+    private void EditPassword()
+    {
+
+
+        string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;"; // Replace with your actual connection string
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+
+                SqlCommand sql_cmnd = new SqlCommand("UpdatePassword", connection);
+                sql_cmnd.CommandType = CommandType.StoredProcedure;
+                sql_cmnd.Parameters.AddWithValue("@newPassword", NewPassword);
+                sql_cmnd.Parameters.AddWithValue("@currentUsername", username);
+                sql_cmnd.ExecuteNonQuery();
+                NavMan.NavigateTo("/fetchdata");
+                NavMan.NavigateTo("/Profile");
+            }
+        }
+
+
+        var message = $"Account '{newAccount.accountname}' added to the database.";
+        Console.WriteLine(message);
+
+        newAccount = new Account();
+    }
+    private void EditTlf()
+    {
+
+
+        string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;"; // Replace with your actual connection string
+
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            using (SqlCommand cmd = new SqlCommand())
+            {
+
+                SqlCommand sql_cmnd = new SqlCommand("UpdateNumber", connection);
+                sql_cmnd.CommandType = CommandType.StoredProcedure;
+                sql_cmnd.Parameters.AddWithValue("@newNumber", NewNumber);
+                sql_cmnd.Parameters.AddWithValue("@currentUsername", username);
+                sql_cmnd.ExecuteNonQuery();
+                NavMan.NavigateTo("/fetchdata");
+                NavMan.NavigateTo("/Profile");
+            }
+        }
+
+
+        var message = $"Account '{newAccount.accountname}' added to the database.";
+        Console.WriteLine(message);
+
+        newAccount = new Account();
     }
 }
