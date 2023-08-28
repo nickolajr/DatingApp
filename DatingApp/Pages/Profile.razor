@@ -1,6 +1,7 @@
 ﻿@page "/Profile"
 @using DatingApp.Models
 @using System.Data.SqlClient
+@using System.Data
 @inject IJSRuntime JSRuntime
 <h3>Profile</h3>
 
@@ -10,17 +11,18 @@
         <label for="accountName">Account Name: @accInfo.accountname </label>
         <input id="accountName" class="form-control" @bind="test" />
     </div>
-
+    <button class="btn btn-primary" @onclick="test1">test</button>
     <div class="form-group">
         <label for="username">Username: @accInfo.username</label>
         <input id="username" class="form-control" @bind="test" />
     </div>
+    <button class="btn btn-primary" @onclick="test1">test</button>
 
     <div class="form-group">
         <label for="password">Password: @accInfo.password</label>
         <input id="password" class="form-control" @bind="test" />
     </div>
-
+    <button class="btn btn-primary" @onclick="test1">test</button>
     <div class="form-group">
         <label for="tlf">Phone Number: @accInfo.tlf</label>
         <input id="tlf" class="form-control" @bind="test" />
@@ -44,11 +46,12 @@
             await con.OpenAsync();
             using (SqlCommand cmd = new SqlCommand())
             {
-                cmd.CommandText = "SELECT Tlf, UserName, Passwords, Names FROM Account WHERE UserName = @username";
-                cmd.Parameters.AddWithValue("@username", username);
+                SqlCommand sql_cmnd = new SqlCommand("SelectUser", con);
+                sql_cmnd.CommandType = CommandType.StoredProcedure;
+                sql_cmnd.Parameters.AddWithValue("@username", username);
                 cmd.Connection = con;
 
-                using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                using (SqlDataReader reader = await sql_cmnd.ExecuteReaderAsync())
                 {
                     if (reader.HasRows)
                     {
