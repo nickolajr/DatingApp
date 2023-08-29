@@ -1,7 +1,7 @@
 ﻿@page "/Auth"
 
 @inject IJSRuntime JSRuntime
-
+@inject NavigationManager NavMan
 @if (isLoggedIn)
 {
     <h3>Welcome, @username!</h3>
@@ -19,33 +19,25 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // Retrieve the value from session storage as a string
+        
         string isLoggedInString = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "isLoggedIn");
 
-        // Parse the string to a boolean with a default value of false
         isLoggedIn = !string.IsNullOrEmpty(isLoggedInString) && bool.TryParse(isLoggedInString, out bool isLoggedInResult) && isLoggedInResult;
         username = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "username");
+        if(!isLoggedIn){ NavMan.NavigateTo("/"); }
     }
 
     private async Task Login()
     {
-        // Add your authentication logic here.
-        // For this example, we'll simulate a successful login.
-        isLoggedIn = true;
-        username = "exampleUser";
-
-        // Store the login status in session storage.
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "isLoggedIn", true);
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "username", username);
+        NavMan.NavigateTo("/");
     }
 
     private async Task Logout()
     {
-        // Clear the login status and username.
+        
         isLoggedIn = false;
         username = "";
-
-        // Remove the items from session storage.
+     
         await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "isLoggedIn");
         await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "username");
     }

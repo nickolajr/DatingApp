@@ -1,7 +1,8 @@
-﻿@page "/login"
+﻿@page "/"
 @using System.Data.SqlClient
 @inject IJSRuntime JSRuntime
-
+@inject NavigationManager NavMan
+@layout NoMenuLayout
 <h3>Login</h3>
 
 @if (!isLoggedIn)
@@ -16,6 +17,7 @@
             <input type="password" class="form-control" id="password" @bind="password" />
         </div>
         <button type="button" class="btn btn-primary" @onclick="HLogin">Login</button>
+        <button type="button" class="btn btn-primary" @onclick="Signup">SignUp</button>
     </form>
 }
 else
@@ -28,10 +30,13 @@ else
     private string username;
     private string password;
     private bool isLoggedIn;
-
+    private void Signup()
+    {
+        NavMan.NavigateTo("/AddAccount");
+    }
     private async Task HLogin()
     {
-        // Authenticate the user against the database
+        
         bool isAuthenticated = await AuthenticateUser(username, password);
 
         if (isAuthenticated)
@@ -41,6 +46,7 @@ else
             // Store the login status and username in session storage.
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", "isLoggedIn", true);
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", "username", username);
+            NavMan.NavigateTo("/Profile");
         }
         else
         {

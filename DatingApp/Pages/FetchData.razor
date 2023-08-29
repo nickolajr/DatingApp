@@ -1,7 +1,9 @@
 ﻿@page "/fetchdata"
 @using DatingApp.Data
 @using System.Data.SqlClient
-
+@using System.Data
+@inject NavigationManager NavMan
+@inject IJSRuntime JSRuntime
 <PageTitle>test</PageTitle>
 
 <h1>input username</h1>
@@ -20,9 +22,17 @@
 @code {
     string test;
     int AccId;
+    private bool isLoggedIn;
+    protected override async Task OnInitializedAsync()
+    {
+        string isLoggedInString = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "isLoggedIn");
+        isLoggedIn = !string.IsNullOrEmpty(isLoggedInString) && bool.TryParse(isLoggedInString, out bool isLoggedInResult) && isLoggedInResult;
 
+        if (!isLoggedIn) { NavMan.NavigateTo("/"); }
+    }
     private void test1()
     {
+        int accId;
         string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;";
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
@@ -30,17 +40,20 @@
 
             using (SqlCommand cmd = new SqlCommand())
             {
-                cmd.Connection = connection;
-                cmd.CommandText = "SELECT Id FROM Account WHERE UserName = @UserName";
-
                 
-                cmd.Parameters.AddWithValue("@UserName", test);
+                cmd.Connection = connection;                
+                SqlCommand sql_cmnd = new SqlCommand("GetProfileId", connection);
+                sql_cmnd.CommandType = CommandType.StoredProcedure;
 
-                object accountId = cmd.ExecuteScalar(); 
+                sql_cmnd.Parameters.AddWithValue("@UserName", test);
+               
+                
+                
+                var resultId =int.Parse(sql_cmnd.ExecuteScalar().ToString());
 
-                if (accountId != null)
+                if (resultId != null)
                 {
-                    int accId = Convert.ToInt32(accountId);
+                    accId = Convert.ToInt32(resultId);
                     AccId = accId;
                 }
             }

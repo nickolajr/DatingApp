@@ -1,0 +1,58 @@
+﻿@page "/Like"
+@using System.Data.SqlClient
+@using System.Data
+@using DatingApp.Models
+@inject IJSRuntime JSRuntime
+
+<h3>Like</h3>
+@foreach (var accInfo in Accinfo)
+{
+<div class="form-group">
+    <label for="accountName">Account Name: @accInfo.accountname </label>
+</div>
+    <div class="form-group">
+        <label for="accountName">Account Id: @accInfo.id </label>
+    </div>
+
+}
+@code {
+    List<Account> Accinfo = new List<Account>();
+    string username;
+    int id;
+    async Task LoadAccountInfoAsync()
+    {
+
+        string conStr = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;";
+
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            await con.OpenAsync();
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                SqlCommand sql_cmnd = new SqlCommand("SelectUser", con);
+                sql_cmnd.CommandType = CommandType.StoredProcedure;
+                sql_cmnd.Parameters.AddWithValue("@username", username);
+                sql_cmnd.Parameters.AddWithValue("@Id", id);
+                cmd.Connection = con;
+
+                using (SqlDataReader reader = await sql_cmnd.ExecuteReaderAsync())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            Account accinfo = new Account();                          
+                            try { accinfo.accountname = reader.GetString(0); } catch { accinfo.accountname = "null"; }
+                            try { accinfo.id = reader.GetInt32(1); } catch { accinfo.id = 0; }
+                            Accinfo.Add(accinfo);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("There's no rows");
+                    }
+                }
+            }
+        }
+    }
+}

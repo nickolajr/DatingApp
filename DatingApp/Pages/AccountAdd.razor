@@ -3,6 +3,8 @@
 @using DatingApp.Models
 @using System.Data.SqlClient
 @using System.Data
+@inject NavigationManager NavMan
+@layout NoMenuLayout
 <h3>Add Account</h3>
 
 <div class="form-group">
@@ -31,12 +33,18 @@
 </div>
 
 <button class="btn btn-primary" @onclick="AddAccount">Add Account</button>
-
+<div class="form-group">
+<label for="">Already have a Account</label>
+<button class="btn btn-primary" @onclick="GoLogin">Login</button>
+</div>
 @code {
 
 
     private Account newAccount = new Account();
-
+    private void GoLogin()
+    {
+        NavMan.NavigateTo("/");
+    }
     private void AddAccount()
     {
 

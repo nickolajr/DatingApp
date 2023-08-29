@@ -41,6 +41,7 @@
     int NewNumber;
     string NewPassword;
     string test;
+
     List<Account> Accinfo = new List<Account>();
 
     async Task LoadAccountInfoAsync()
@@ -86,7 +87,12 @@
     protected override async Task OnInitializedAsync()
     {
         username = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "username");
-        await LoadAccountInfoAsync();
+        string isLoggedInString = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "isLoggedIn");      
+        isLoggedIn = !string.IsNullOrEmpty(isLoggedInString) && bool.TryParse(isLoggedInString, out bool isLoggedInResult) && isLoggedInResult;
+
+        if (!isLoggedIn) { NavMan.NavigateTo("/"); }
+        else {await LoadAccountInfoAsync();}
+       
     }
 
     void test1()
@@ -99,7 +105,7 @@
     {
 
 
-        string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;"; // Replace with your actual connection string
+        string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;";
 
         using (SqlConnection connection = new SqlConnection(connectionString))
         {

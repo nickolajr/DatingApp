@@ -9,6 +9,7 @@ namespace DatingApp.Models
         public int tlf { get; set; }
         public DateTime date { get; set; }
         public string username { get; set; }
+        public int id { get; set; }
         
 
     }
