@@ -5,23 +5,43 @@
 @inject IJSRuntime JSRuntime
 
 <h3>Like</h3>
-@foreach (var accInfo in Accinfo)
+
+@if (Accinfo != null && Accinfo.Count > 0)
 {
-<div class="form-group">
-    <label for="accountName">Account Name: @accInfo.accountname </label>
-</div>
-    <div class="form-group">
-        <label for="accountName">Account Id: @accInfo.id </label>
-    </div>
-
-}
-@code {
-    List<Account> Accinfo = new List<Account>();
-    string username;
-    int id;
-    async Task LoadAccountInfoAsync()
+    @foreach (var account in Accinfo)
     {
+        <div class="profile-card">
+            <div class="form-group">
+                <label for="accountName">Account Name: @account.accountname </label>
+            </div>
+            <div class="form-group">
+                <label for="accountName">Account Id: @account.id </label>
+            </div>
+            <button @onclick="() => LikeProfile(account.id)">Like</button>
+        </div>
+    }
+}
+else
+{
+    <p>No accounts to display.</p>
+}
 
+@code {
+    List<Account> Accinfo;
+    string username;
+    string middle;
+    int id;
+
+    protected override async Task OnInitializedAsync()
+    {
+        middle = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "Id");
+        id = Convert.ToInt32(middle);
+        await LoadAccountsAsync();
+    }
+
+    async Task LikeProfile(int receiverId)
+    {
+        
         string conStr = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;";
 
         using (SqlConnection con = new SqlConnection(conStr))
@@ -29,30 +49,72 @@
             await con.OpenAsync();
             using (SqlCommand cmd = new SqlCommand())
             {
-                SqlCommand sql_cmnd = new SqlCommand("SelectUser", con);
-                sql_cmnd.CommandType = CommandType.StoredProcedure;
-                sql_cmnd.Parameters.AddWithValue("@username", username);
-                sql_cmnd.Parameters.AddWithValue("@Id", id);
-                cmd.Connection = con;
+                SqlCommand likeCmd = new SqlCommand("AddLike", con);
+                likeCmd.CommandType = CommandType.StoredProcedure;
+                likeCmd.Parameters.AddWithValue("@SenderId", id);
+                likeCmd.Parameters.AddWithValue("@ReceiverId", receiverId);
 
-                using (SqlDataReader reader = await sql_cmnd.ExecuteReaderAsync())
+                // Execute the like stored procedure
+                await likeCmd.ExecuteNonQueryAsync();
+
+                // Check if a mutual like exists
+                SqlCommand checkLikeCmd = new SqlCommand("SendMessageIfMutualLike", con);
+                checkLikeCmd.CommandType = CommandType.StoredProcedure;
+                checkLikeCmd.Parameters.AddWithValue("@SenderId", id);
+                checkLikeCmd.Parameters.AddWithValue("@ReceiverId", receiverId);
+                checkLikeCmd.Parameters.AddWithValue("@ChatId", 0);
+
+                int result = (int)await checkLikeCmd.ExecuteScalarAsync();
+
+                if (result == 0)
                 {
-                    if (reader.HasRows)
+                    // Handle the case where there is no mutual like
+                    await JSRuntime.InvokeVoidAsync("alert", "You need a mutual like to chat.");
+                }
+                else
+                {
+                    // Handle the case where a mutual like exists, and you can create a chat.
+                    // You can redirect the user to the chat page or implement chat functionality here.
+                    // Example: NavigationManager.NavigateTo("/ChatPage");
+                }
+            }
+        }
+        
+    }
+
+    async Task LoadAccountsAsync()
+    {
+        Accinfo = new List<Account>();
+
+        try
+        {
+            string conStr = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;";
+
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+                await con.OpenAsync();
+                using (SqlCommand cmd = new SqlCommand("GetAccountsLinkedToProfiles", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
-                            Account accinfo = new Account();                          
-                            try { accinfo.accountname = reader.GetString(0); } catch { accinfo.accountname = "null"; }
-                            try { accinfo.id = reader.GetInt32(1); } catch { accinfo.id = 0; }
-                            Accinfo.Add(accinfo);
+                            Account account = new Account
+                                {
+                                    id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    accountname = reader.GetString(reader.GetOrdinal("Names"))
+                                };
+                            Accinfo.Add(account);
                         }
-                    }
-                    else
-                    {
-                        Console.WriteLine("There's no rows");
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading accounts: {ex.Message}");
         }
     }
 }

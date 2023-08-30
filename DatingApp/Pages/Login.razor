@@ -1,5 +1,8 @@
 ﻿@page "/"
 @using System.Data.SqlClient
+@using System.Data
+@using System.Text.Json
+@using DatingApp.Models
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavMan
 @layout NoMenuLayout
@@ -27,7 +30,9 @@ else
 }
 
 @code {
+    private int AccId;
     private string username;
+    private int Id;
     private string password;
     private bool isLoggedIn;
     private void Signup()
@@ -36,16 +41,18 @@ else
     }
     private async Task HLogin()
     {
-        
+
         bool isAuthenticated = await AuthenticateUser(username, password);
 
         if (isAuthenticated)
         {
             isLoggedIn = true;
-
+            
             // Store the login status and username in session storage.
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", "isLoggedIn", true);
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", "username", username);
+            test1();
+            
             NavMan.NavigateTo("/Profile");
         }
         else
@@ -66,8 +73,46 @@ else
         // Remove the login status and username from session storage.
         await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "isLoggedIn");
         await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "username");
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "Id", Id);
     }
+    private async Task test1()
+    {
+        int accId;
+        string connectionString = "Data Source=SKAB2-PC1;Initial Catalog=NonLonelySim;Integrated Security=True;TrustServerCertificate=True;";
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
 
+            using (SqlCommand cmd = new SqlCommand())
+            {
+
+                cmd.Connection = connection;
+                SqlCommand sql_cmnd = new SqlCommand("GetProfileId", connection);
+                sql_cmnd.CommandType = CommandType.StoredProcedure;
+
+                sql_cmnd.Parameters.AddWithValue("@UserName", username);
+
+                var resultId =int.Parse(sql_cmnd.ExecuteScalar().ToString());
+
+                if (resultId != null)
+                {
+                    accId = Convert.ToInt32(resultId);
+                    AccId = accId;
+                    await JSRuntime.InvokeVoidAsync("localStorage.setItem", "Id", accId);
+                }
+
+               
+
+                // Parse the JSON value to extract the user ID
+                
+
+               
+
+            }
+
+            connection.Close();
+        }
+    }
     private async Task<bool> AuthenticateUser(string username, string password)
     {
         // Replace with your database connection logic
@@ -95,6 +140,7 @@ else
                             if (storedPassword == password)
                             {
                                 return true; // Authentication successful
+
                             }
                             else
                             {
